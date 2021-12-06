@@ -10,23 +10,50 @@ const token = '5071403316:AAGpEpGAAYT0nAOuvvmzwicf-sdltKElhX4'
 const bot = new TelegramBot(token, {polling: true});
 
 
-// bots
+// Main Menu Bot
 bot.onText(/\/start/, (msg) => { 
     console.log(msg)
     bot.sendMessage(
         msg.chat.id,
-        `hello ${msg.chat.first_name}, welcome...\n
-        click /menu to main menu`
+        `Hello ${msg.chat.first_name}, Welcome to Bot-SC-Nandiko...\n
+        click /predict`
     );   
 });
 
-bot.onText(/\/menu/, (msg) => { 
-    console.log(msg)
+// input requires i and r
+state = 0;
+bot.onText(/\/predict/, (msg) => { 
     bot.sendMessage(
         msg.chat.id,
-        `this is your main menu`
+        `Masukkan nilai i|v , contohnya 9|9`
     );   
+    state = 1;
 });
+
+bot.on('message', (msg) => {
+    if(state == 1){
+        s = msg.text.split("|");
+        i = s[0]
+        v = s[1]
+        model.predict(
+            [
+                parseFloat(s[0]), // string to float
+                parseFloat(s[1])
+            ]
+        ).then((jres)=>{
+            bot.sendMessage(
+                msg.chat.id,
+                `Nilai v yang diprediksi adalah ${jres[0]} Volt`
+            );
+            bot.sendMessage(
+                msg.chat.id,
+                `Nilai p yang diprediksi adalah ${jres[1]} Watt`
+            );
+        })
+    }else{
+        state = 0
+    }
+})
 
 // routers
 r.get('/prediction/:i/:r', function(req, res, next) {    
